@@ -67,7 +67,6 @@ function init() {
     // Trees
     for (let i = 0; i < 10; i++) {
       let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl")
-      console.log( tree )
       scene.add( tree )
     }
 

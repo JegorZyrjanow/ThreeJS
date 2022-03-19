@@ -1,12 +1,12 @@
 import * as THREE from '../lib/three.module.js'
 import { GLTFLoader } from '../lib/GLTFLoader.js'
 
-var mesh
-
 function loadAnimatedModel(path, scene) {
+  let mesh
+  let model = new THREE.Object3D()
   let mixer = new THREE.AnimationMixer( scene )
   let GltfLoader = new GLTFLoader();
-  let model
+
   GltfLoader.load(path, (gltf) => {
     mesh = gltf.scene.children[0]
 
@@ -15,8 +15,7 @@ function loadAnimatedModel(path, scene) {
 
     mesh.scale.set(0.05, 0.05, 0.05)
     mesh.castShadow = true
-
-    model = mesh
+    model.add( mesh )
   })
   return model
 }
