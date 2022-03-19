@@ -10,9 +10,6 @@ var container;
 var camera, scene, renderer;
 var keyboard = new THREEx.KeyboardState();
 
-var tLoader = new THREE.TextureLoader();
-var GltfLoader = new GLTFLoader();    
-
 var clock = new THREE.Clock();
 var chase = -1;
 var angle = 45;
@@ -27,7 +24,6 @@ var mixer = new THREE.AnimationMixer(scene);
 var curve;
 let fraction = 0;
 
-var mesh;
 var T = 11;
 var t = 0;
 var path = null;
@@ -55,10 +51,11 @@ function init() {
 
     // Light
     const light = loadLight()
-    scene.add( light );
+    scene.add( light )
 
     // Terrain
-    loadTerrain() //???
+    const terrain = loadTerrain()
+    scene.add( terrain )
 
     // Sky
     const sphere = loadSphere(600, "images/sky.jpg")
@@ -66,11 +63,14 @@ function init() {
 
     // Trees
     for (let i = 0; i < 10; i++) {
-      let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl")
+      let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
       scene.add( tree )
     }
 
     // Bird
+    //var animations = gltf.animations
+    //mixer.clipAnimation( animations[0], mesh ).play()
+    //let mixer = new THREE.AnimationMixer( scene )
     const animatedModel = loadAnimatedModel("../models/Parrot.glb", scene)
     //setPathFor(morphs[0])
     morphs.push( animatedModel )
@@ -130,7 +130,7 @@ function setPathFor(morph, pathShift = 0){
 	// m1.extractRotation(morphs[0].matrixWorld);
 	// m2.extractPosition(morphs[0].matrixWorld);
 	m1.extractRotation(morph.matrixWorld);
-	m2.extractPosition(morph.matrixWorld);
+	m2.copyPosition(morph.matrixWorld);
     m1.multiplyMatrices(m2, m1);
 
 	var cameraOffset = relativeCameraOffset.applyMatrix4(m1);
@@ -238,21 +238,25 @@ function getPixel(imageData, x, y){
 
 var chase = -1;
 
+// CONTROLS
 function keys(){                    // Shift scaling by pressing the btn
-    if(keyboard.pressed("0")){
+    if (keyboard.pressed("0")){
         chase = -1;
     }
-    if(keyboard.pressed("1")){
+    if (keyboard.pressed("1")){
         chase = 0;
     }
-    if(keyboard.pressed("2")){
+    if (keyboard.pressed("2")){
         chase = 1;
     }
-
-    if(keyboard.pressed("w")){
-        while (true){
-            //object.setposition += ...
-        }
+    if (keyboard.pressed("w")){
+        object.extractRotation
+    }
+    if (keyboard.pressed("a")){
+    }
+    if (keyboard.pressed("s")){
+    }
+    if (keyboard.pressed("d")){
     }
 
     if(chase > -1){

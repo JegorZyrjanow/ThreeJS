@@ -4,17 +4,22 @@ import { OBJLoader } from '../lib/OBJLoader.js'
 
 //let manager = new THREE.LoadingManager()
 
-function loadStaticModel( path, oName, mName ) {
+function loadStaticModel( path, oName, mName, imageData ) {
+    let N = 225
+    let canvas = (document.getElementsByTagName('canvas'))[0]
+    let context = canvas.getContext( '2d' )
+    //context.getImageData
+    //let imageData = context.getImageData(0, 0, image.width, image.height)  
     // init three's loaders
     let model = new THREE.Object3D()
     let mtlLoader = new MTLLoader()
     let objLoader = new OBJLoader()
     // setting path to the models
-    mtlLoader.setPath( path ) 
+    mtlLoader.setPath( path )
     objLoader.setPath( path )
 
     // loading the material
-    mtlLoader.load( mName, ( materials ) => { // tf is that 'material'? 
+    mtlLoader.load( mName, ( materials ) => {
         materials.preload()
         // setting the material
         objLoader.setMaterials( materials )
@@ -33,6 +38,13 @@ function loadStaticModel( path, oName, mName ) {
         })
     })
     return model
+}
+
+function getPixel( imageData, z, x ) {
+    const position = (z + imageData.width * x) * 4
+    const data = imageData.data
+
+    return data[position];
 }
 
 function l1oadStaticModel(path, oName, mName) {
