@@ -1,12 +1,12 @@
 import * as THREE from '../lib/three.module.js'
 
-const loadSphere = (radius, texturePath) => {
-    const geometry = new THREE.SphereGeometry(radius, 200, 200)
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(texturePath)
-    texture.minFilter = THREE.NearestFilter
+const textureLoader = new THREE.TextureLoader();
 
-    const material = new THREE.MeshBasicMaterial({
+const loadSphere = (radius, texturePath) => {
+    let geometry = new THREE.SphereGeometry(radius, 200, 200)
+    let texture = textureLoader.load(texturePath)
+    texture.minFilter = THREE.NearestFilter
+    let material = new THREE.MeshBasicMaterial({
       map: texture,
       side: THREE.DoubleSide
     })

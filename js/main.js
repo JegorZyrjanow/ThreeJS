@@ -1,36 +1,32 @@
+import loadLight from './loaders/loadLight.js'
 import loadSphere from './loaders/loadSphere.js'
-import loadTerrain from './loaders/loadTerrain.js'
+import TerrainLoader from './loaders/loadTerrain.js'
 import loadStaticModel from './loaders/loadStaticModel.js'
 import loadAnimatedModel from './loaders/loadAnimatedModel.js'
-import loadLight from './loaders/loadLight.js'
+
 import * as THREE from './lib/three.module.js';
-import { GLTFLoader } from "./lib/GLTFLoader.js";
 
-var container;
-var camera, scene, renderer;
-var keyboard = new THREEx.KeyboardState();
+let keyboard = new THREEx.KeyboardState();
 
-var clock = new THREE.Clock();
-var chase = -1;
-var angle = 45;
+let container;
+let camera, scene, renderer;
 
-var imageData;
+let clock = new THREE.Clock();
+let chase = -1;
+let angle = 45;
+
+//var imageData;
 const N = 225;
-var geometry = new THREE.BufferGeometry();
 
-var morphs = [];
-var mixer = new THREE.AnimationMixer(scene);
+let morphs = [];
+let mixer = new THREE.AnimationMixer(scene);
 
-var curve;
+let curve;
 let fraction = 0;
 
-var T = 11;
-var t = 0;
-var path = null;
-
-let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15);
-let m1 = new THREE.Matrix4();
-let m2 = new THREE.Matrix4();
+let T = 11;
+let t = 0;
+let path = null;
 
 init();
 animate();
@@ -57,186 +53,117 @@ function init() {
     const light = loadLight()
     scene.add( light )
 
-    // Terrain
-    const terrain = loadTerrain()
-    scene.add( terrain )
-
     // Sky
     const sphere = loadSphere(600, "images/sky.jpg")
     scene.add( sphere )
 
+    // Terrain
+    let terrainLoader = new TerrainLoader()
+    const terrain = terrainLoader.loadTerrain()
+    scene.add( terrain )
+
     // Trees
     for (let i = 0; i < 10; i++) {
-      let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
-      scene.add( tree )
+        let imageData = terrainLoader.getImageData()
+        console.log( imageData )
+        let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
+        scene.add( tree )
     }
 
     // Bird
     //var animations = gltf.animations
     //mixer.clipAnimation( animations[0], mesh ).play()
     //let mixer = new THREE.AnimationMixer( scene )
-    const animatedModel = loadAnimatedModel("../models/Parrot.glb", scene)
-    //setPathFor(morphs[0])
-    morphs.push( animatedModel )
+    const animatedModel = loadAnimatedModel("../models/Parrot.glb")
+    morphs.push( animatedModel ) // add to array
     scene.add( animatedModel )
-    //loadAnimatedModel("../models/Stork.glb")
     //setPathFor(morphs[1], 50)
 }
 
-function animate() {
-    var morph;
-    
-    setPathFor(morph, 80);
+let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15);
+let m1 = new THREE.Matrix4();
+let m2 = new THREE.Matrix4();
 
+function animate() {
+    setPathFor( morphs[0], 80 );
     // ???
     // const newPosition = curve.getPoint(fraction);
     // const tangent = curve.getTangent(fraction);
     //morph.position.copy(newPosition);
-    
-    requestAnimationFrame(animate);
+    requestAnimationFrame( animate );
     render();
 }
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
-function setPathFor(morph, pathShift = 0){
-    var delta = clock.getDelta();
+function setPathFor( morph, pathShift = 0 ){
+    let delta = clock.getDelta();
     mixer.update( delta );
     t += delta;
-    var position = new THREE.Vector3();       
-    var morph;
+    let position = new THREE.Vector3();       
     //const oldObjectPosition = new THREE.Vector3()
-    for (let i = 0; i < morphs.length; i++) {
-        morph = morphs[i];
+    //for (let i = 0; i < morphs.length; i++) {
+        //morph = morphs[i];
         position = new THREE.Vector3();
-        if (t >= T)
+        if ( t >= T )
 	    t = 0;
-        morph.position.copy((buildPath(pathShift).getPointAt(t/T))); // HERE'D BE FLW
-        if (t + 0.1 > T)
+        morph.position.copy(( buildPath(pathShift).getPointAt(t / T) )); // HERE'D BE FLW
+        if ( t + 0.1 > T )
 	    t = 0;
-        var nextPoint = new THREE.Vector3();
-        nextPoint.copy(path.getPointAt((t + 0.1) / T));
-        morph.lookAt(nextPoint);
+        let nextPoint = new THREE.Vector3();
+        nextPoint.copy(path.getPointAt( (t + 0.1) / T) );
+        morph.lookAt( nextPoint );
 
-    var relativeCameraOffset = new THREE.Vector3(0,3,-15)
+    let relativeCameraOffset = new THREE.Vector3( 0, 3, -15 )
 
-    var m1 = new THREE.Matrix4();
-    var m2 = new THREE.Matrix4();
+    let m1 = new THREE.Matrix4();
+    let m2 = new THREE.Matrix4();
 
 	// m1.extractRotation(morphs[0].matrixWorld);
 	// m2.extractPosition(morphs[0].matrixWorld);
-	m1.extractRotation(morph.matrixWorld);
-	m2.copyPosition(morph.matrixWorld);
-    m1.multiplyMatrices(m2, m1);
+	m1.extractRotation( morph.matrixWorld );
+	m2.copyPosition( morph.matrixWorld );
+    m1.multiplyMatrices( m2, m1 );
 
-	var cameraOffset = relativeCameraOffset.applyMatrix4(m1);
-	camera.position.copy(cameraOffset);
+	let cameraOffset = relativeCameraOffset.applyMatrix4(m1);
+	camera.position.copy( cameraOffset );
 
 	// DONE
-	camera.lookAt(morph.position);
-    }
+	camera.lookAt( morph.position );
 }
 
-function buildPath(shift = 0){
+function buildPath( shift = 0 ){
     // Path points
-    var cY = 40;
+    let cY = 40
     curve = new THREE.CubicBezierCurve3(
-        new THREE.Vector3(120 + shift, cY, 120 + shift),
-        new THREE.Vector3(120 + shift, cY, 25 + shift),
-        new THREE.Vector3(50 + shift, cY, 25 + shift),
-        new THREE.Vector3(50 + shift, cY, 120 + shift)
+        new THREE.Vector3( 120 + shift, cY, 120 + shift ),
+        new THREE.Vector3( 120 + shift, cY, 25 + shift ),
+        new THREE.Vector3( 50 + shift, cY, 25 + shift ),
+        new THREE.Vector3( 50 + shift, cY, 120 + shift )
     );
     
-    var vertices = [] = curve.getPoints( 100 );
+    let vertices = [] = curve.getPoints( 100 )
     
     // New path with points
-    path = new THREE.CatmullRomCurve3( vertices ); 
-    path.closed = true; // closing the path
+    path = new THREE.CatmullRomCurve3( vertices )
+    path.closed = true // closing the path
 
     // Visualize
-    var geometry = new THREE.BufferGeometry().setFromPoints( vertices );
-    var material = new THREE.LineBasicMaterial( { color : 0x00daa1 } );
-    var curveObject = new THREE.Line( geometry, material );
-    scene.add(curveObject);
+    let geometry = new THREE.BufferGeometry().setFromPoints( vertices )
+    let material = new THREE.LineBasicMaterial( { color : 0x00daa1 } )
+    let curveObject = new THREE.Line( geometry, material )
+    scene.add( curveObject )
 
-    return path;
+    return path
 }
 
 function render() {
-    renderer.render(scene, camera);
+    renderer.render( scene, camera )
 }
-
-//function loadAnimatedModel(path) {
-//    GltfLoader.load(path, (gltf) => {
-//        mesh = gltf.scene.children[0];
-//    
-//	// Animation [?]
-//    var animations = gltf.animations;
-//    //mixer.clipAction(clip, mesh).setDuration(1).startAt(0).play();
-//	mixer.clipAction( animations[0], mesh ).play()
-//	
-//	// Scaling
-//    mesh.scale.set(0.05, 0.05, 0.05);
-//    mesh.castShadow = true;
-//
-//	// Put a model
-//    morphs.push(mesh);
-//    scene.add(mesh);
-//    });
-//}
-
-function CreateTerrain(){
-    var vertices = [];
-    var uvs = [];
-    var faces = [];
-
-    for(let z = 0; z < N; z++){
-        for(let x = 0; x < N; x++){
-            var h = getPixel(imageData, z, x);
-            vertices.push(x, h/10, z);
-            uvs.push(z / (N - 1), x / (N - 1));
-        }
-    }
-
-    let num = N; // создание переменной для перечисления десятков (y)
-    for(let m = 0; m < N - 1; m++){    
-        for(let n = 0; n < N - 1; n++){
-            faces.push((num + n - N), (num + n - N) + 1, num + (n + 1)); // треугольник (верхний угол)
-            faces.push((num + n - N), num + (n + 1), num + (n)); // треугольник (нижний угол)
-        }
-        num = num + N; // добавление десятка после отрисовки одной строки
-    }
-
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setIndex(faces);
-    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
-
-    geometry.computeVertexNormals();
-
-    var texture = new THREE.TextureLoader().load('images/terrain.jpg')
-
-    var planeMaterial = new THREE.MeshLambertMaterial({
-        map: texture,
-        wireframe: false,
-        side: THREE.DoubleSide
-    })
-    
-    const plane = new THREE.Mesh( geometry, planeMaterial );
-    scene.add( plane );
-}
-
-function getPixel(imageData, x, y){
-    var position = (x + imageData.width * y) * 4
-    var data = imageData.data;
-
-    return data[position];
-}
-
-var chase = -1;
 
 // CONTROLS
 function keys(){                    // Shift scaling by pressing the btn
@@ -260,13 +187,13 @@ function keys(){                    // Shift scaling by pressing the btn
     }
 
     if(chase > -1){
-        var mm = new THREE.Matrix4();
+        let mm = new THREE.Matrix4();
         mm.copyPosition(planets[chase].sphere.matrix);
-        var position = new THREE.Vector3(0,0.0,0);
+        let position = new THREE.Vector3(0,0.0,0);
         position.setFromMatrixPosition(mm);
 
-        var x = position.x + planets[chase].r * 4 * Math.cos(angle - planets[chase].a1);
-        var z = position.z + planets[chase].r * 4 * Math.sin(angle - planets[chase].a1);
+        let x = position.x + planets[chase].r * 4 * Math.cos(angle - planets[chase].a1);
+        let z = position.z + planets[chase].r * 4 * Math.sin(angle - planets[chase].a1);
         camera.position.set(x, 0, z);
         camera.lookAt(position)
     }

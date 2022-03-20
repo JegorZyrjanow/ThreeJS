@@ -1,3 +1,4 @@
-dist
+﻿dist
 node_modules
 log.md
+/.idea/
