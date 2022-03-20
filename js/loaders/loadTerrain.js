@@ -14,39 +14,39 @@ function loadTerrain() {
         canvas.width = image.width
         canvas.height = image.height
         context.drawImage( image, 0, 0 )
-        imageData = context.getImageData(0, 0, image.width, image.height)
+        imageData = context.getImageData( 0, 0, image.width, image.height )
 
         //createTerrain();
-        var vertices= []
-        var uvs = []
-        var faces = []
-        for ( let z = 0; z < N; z++ ){
-            for ( let x = 0; x < N; x++ ){
-                var h = getPixel( imageData, z, x )
-                vertices.push( x, h / 10, z )
-                uvs.push( z / ( N - 1 ), x / ( N - 1 ) )
+        var vertices = [];
+        var uvs = [];
+        var faces = [];
+        for (let z = 0; z < N; z++) {
+            for (let x = 0; x < N; x++) {
+                var h = getPixel( imageData, z, x );
+                vertices.push( x, h/10, z );
+                uvs.push( z / (N - 1), x / (N - 1) );
             }
         }
 
-        var num = N
-        for ( let n = 0; n < N - 1; n++){
-            for ( let m = 0; m < N - 1; m++ ){
-                faces.push( (num + n - N), (num + n - N) + 1, num + (n + 1) )
-                faces.push( (num + n - N), num + (n + 1), num + (n))
+        let num = N; // создание переменной для перечисления десятков (y)
+        for (let m = 0; m < N - 1; m++) {    
+            for (let n = 0; n < N - 1; n++) {
+                faces.push( (num + n - N), (num + n - N) + 1, num + (n + 1) ); // треугольник (верхний угол)
+                faces.push( (num + n - N), num + (n + 1), num + (n) ); // треугольник (нижний угол)
             }
-          num = num + N
+            num = num + N; // добавление десятка после отрисовки одной строки
         }
 
         geometry.setAttribute(
             'position',
-            new THREE.Float32BufferAttribute( vertices, 3 ));
+            new THREE.Float32BufferAttribute( vertices, 3 ) );
         geometry.setIndex( faces )
         geometry.setAttribute(
             'uv',
-            new THREE.Float32BufferAttribute( uvs, 2));
+            new THREE.Float32BufferAttribute( uvs, 2 ) );
         geometry.computeVertexNormals();
 
-        var texture = new THREE.TextureLoader().load('../../images/terrain.jpg')
+        var texture = new THREE.TextureLoader().load( '../../images/terrain.jpg' )
         var material = new THREE.MeshLambertMaterial({
             map: texture,
             wireframe: false,
@@ -60,7 +60,7 @@ function loadTerrain() {
 }
 
 function getPixel(imageData, x, y){
-    const position = (x + imageData.width * y) * 4
+    const position = ( x + imageData.width * y ) * 4
     const data = imageData.data
 
     return data[position];

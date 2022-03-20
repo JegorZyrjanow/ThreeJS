@@ -3,8 +3,10 @@ import { MTLLoader } from '../lib/MTLLoader.js'
 import { OBJLoader } from '../lib/OBJLoader.js'
 
 //let manager = new THREE.LoadingManager()
+let _imageData
 
 function loadStaticModel( path, oName, mName, imageData ) {
+    _imageData = imageData
     let N = 225
     let canvas = (document.getElementsByTagName('canvas'))[0]
     let context = canvas.getContext( '2d' )
@@ -30,7 +32,7 @@ function loadStaticModel( path, oName, mName, imageData ) {
             obj.scale.set( 0.15, 0.15, 0.15 )
             const x = Math.round( Math.random() * N )
             const z = Math.round( Math.random() * N )
-            const h = getPixel( imageData, z, x )
+            const h = getPixel( _imageData, z, x )
             obj.position.x = x
             obj.position.z = z 
             obj.position.y = h / 10 - 1
@@ -40,10 +42,9 @@ function loadStaticModel( path, oName, mName, imageData ) {
     return model
 }
 
-function getPixel( imageData, z, x ) {
-    const position = (z + imageData.width * x) * 4
+function getPixel( imageData, x, y ) {
+    const position = (x + _imageData.width * y) * 4
     const data = imageData.data
-
     return data[position];
 }
 

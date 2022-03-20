@@ -28,6 +28,10 @@ var T = 11;
 var t = 0;
 var path = null;
 
+let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15);
+let m1 = new THREE.Matrix4();
+let m2 = new THREE.Matrix4();
+
 init();
 animate();
 
@@ -79,16 +83,6 @@ function init() {
     //setPathFor(morphs[1], 50)
 }
 
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-var relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15);
-var m1 = new THREE.Matrix4();
-var m2 = new THREE.Matrix4();
-
 function animate() {
     var morph;
     
@@ -101,6 +95,12 @@ function animate() {
     
     requestAnimationFrame(animate);
     render();
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function setPathFor(morph, pathShift = 0){
