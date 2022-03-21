@@ -70,7 +70,6 @@ function createPanel() {
             control.setInactive();
         }
     });
-
 }
 
 function setWeight( action, weight ) {

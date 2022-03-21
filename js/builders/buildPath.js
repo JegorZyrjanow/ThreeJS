@@ -31,16 +31,16 @@ function buildPath( shift = 0, scene ){
     return path
 }
 
-function setPathFor( scene, morph, pathShift = 0 ){
-    let delta = clock.getDelta();
+function setPathFor( scene, camera, morph, pathShift = 0 ){
+    let delta = new THREE.Clock().getDelta();
+    mixer = new THREE.AnimationMixer( morph )
     mixer.update( delta );
-    t += delta;
-    //const oldObjectPosition = new THREE.Vector3()
-    //for (let i = 0; i < morphs.length; i++) {
-    //morph = morphs[i];
+    t = delta;
     if ( t >= T )
         t = 0;
-    morph.position.copy(( buildPath(pathShift, scene).getPointAt( t / T ) )); // HERE'D BE FLW
+    let pathPoint = ( buildPath(pathShift, scene).getPointAt( t / T ) ) 
+    console.log( path )
+    morph.position.copy( pathPoint ); // THERE'LL BE FLW
     if ( t + 0.1 > T )
         t = 0;
     let nextPoint = new THREE.Vector3();

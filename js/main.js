@@ -8,10 +8,9 @@ import loadAnimatedModel from './loaders/loadAnimatedModel.js'
 import { buildPath } from "./builders/buildPath.js";
 import { setPathFor } from "./builders/buildPath.js";
 import createPanel from "./gui/gui.js";
+import { GUI } from "../node_modules/three/examples/jsm/libs/lil-gui.module.min.js";
 
 //import * as THREE from './lib/three.module.js';
-
-let keyboard = new THREEx.KeyboardState();
 
 let container;
 let camera, scene, renderer;
@@ -62,21 +61,22 @@ function init() {
     scene.add( terrain )
 
     // Trees
-    for (let i = 0; i < 10; i++) {
-        let imageData = terrainLoader.getImageData()
-        console.log( imageData )
-        let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
-        scene.add( tree )
-    }
+    //for (let i = 0; i < 10; i++) {
+    //    let imageData = terrainLoader.getImageData()
+    //    console.log( imageData )
+    //    let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
+    //    scene.add( tree )
+    //}
 
-    // Bird
     //var animations = gltf.animations
     //mixer.clipAnimation( animations[0], mesh ).play()
     //let mixer = new THREE.AnimationMixer( scene )
+    // Bird
     const animatedModel = loadAnimatedModel("../models/Parrot.glb")
     morphs.push( animatedModel ) // add to array
     scene.add( animatedModel )
     //setPathFor(morphs[1], 50)
+    createPanelTest()
 }
 
 let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15);
@@ -84,7 +84,7 @@ let m1 = new THREE.Matrix4();
 let m2 = new THREE.Matrix4();
 
 function animate() {
-    setPathFor( morphs[0], 80 );
+    setPathFor( scene, camera, morphs[0], 80 );
     // ???
     // const newPosition = curve.getPoint(fraction);
     // const tangent = curve.getTangent(fraction);
@@ -103,8 +103,25 @@ function onWindowResize() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
-// CONTROLS
-function keys(){                    // Shift scaling by pressing the btn
+function createPanelTest() {
+    const panel = new GUI( { width: 310} )
+    const folder = panel.addFolder( 'camera edit' )
+    let panelSettings = {
+        'modify camera angle': 90
+    };
+    folder.add ( panelSettings, 'modify camera angle', 30, 90, 10 ).listen().onChange( function ( modAngle ) {
+        angle = modAngle
+    } );
+
+    folder.open()
+}
+
+function modifyCameraAngle( modAngle ) {
+    angle = modAngle
+}
+
+// CONTROLS (replaced with gui)
+function keys(){
     if (keyboard.pressed("0")){
         chase = -1;
     }
