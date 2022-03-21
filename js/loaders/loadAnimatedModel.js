@@ -1,5 +1,5 @@
-import * as THREE from '../lib/three.module.js'
-import { GLTFLoader } from '../lib/GLTFLoader.js'
+import * as THREE from 'three'
+import { GLTFLoader } from '../../node_modules/three/examples/jsm/loaders/GLTFLoader.js'
 
 function loadAnimatedModel(path) {
     let model = new THREE.Object3D()

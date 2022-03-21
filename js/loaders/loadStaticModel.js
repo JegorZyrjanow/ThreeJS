@@ -1,6 +1,6 @@
-import * as THREE from '../lib/three.module.js'
-import { MTLLoader } from '../lib/MTLLoader.js'
-import { OBJLoader } from '../lib/OBJLoader.js'
+import * as THREE from 'three'
+import { MTLLoader } from '../../node_modules/three/examples/jsm/loaders/MTLLoader.js'
+import { OBJLoader } from '../../node_modules/three/examples/jsm/loaders/OBJLoader.js'
 
 //let manager = new THREE.LoadingManager()
 

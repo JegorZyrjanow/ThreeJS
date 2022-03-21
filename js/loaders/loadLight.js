@@ -1,4 +1,4 @@
-import * as THREE from '../lib/three.module.js'
+import * as THREE from 'three'
 
 const loadLight = () => {
     const light = new THREE.PointLight( 0xffffff, 1, 1000 )
