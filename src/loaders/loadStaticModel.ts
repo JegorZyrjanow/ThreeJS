@@ -1,10 +1,10 @@
 import * as THREE from 'three'
-import { MTLLoader } from '../../node_modules/three/examples/jsm/loaders/MTLLoader.js'
-import { OBJLoader } from '../../node_modules/three/examples/jsm/loaders/OBJLoader.js'
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 
 //let manager = new THREE.LoadingManager()
 
-function loadStaticModel( path, oName, mName, imageData ) {
+function loadStaticModel( path: string, oName: string, mName: string, imageData: any ) {
     let N = 225
     let canvas = (document.getElementsByTagName('canvas'))[0]
     let context = canvas.getContext( '2d' )
@@ -41,7 +41,7 @@ function loadStaticModel( path, oName, mName, imageData ) {
     return model
 }
 
-function getPixel(imageData, x, y){
+function getPixel(imageData: any, x: number, y: number){
     const position = ( x + imageData.width * y ) * 4
     const data = imageData.data
     return data[position];

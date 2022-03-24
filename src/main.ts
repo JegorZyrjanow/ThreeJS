@@ -8,23 +8,23 @@ import loadAnimatedModel from './loaders/loadAnimatedModel.js'
 import { buildPath } from "./builders/buildPath.js";
 import { setPathFor } from "./builders/buildPath.js";
 import createPanel from "./gui/gui.js";
-import { GUI } from "../node_modules/three/examples/jsm/libs/lil-gui.module.min.js";
+import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 
 //import * as THREE from './lib/three.module.js';
 
-let container;
-let camera, scene, renderer;
+let container: any;
+let camera:any, scene: any, renderer: any
 
 let clock = new THREE.Clock();
-let chase = -1;
-let angle = 45;
+let chase: number = -1;
+let angle: number = 45;
 
 //var imageData;
-const N = 225;
+const N: number = 225;
 
-let morphs = [];
+let morphs: any = [];
 
-let fraction = 0;
+let fraction: number = 0;
 
 init();
 animate();
@@ -109,46 +109,46 @@ function createPanelTest() {
     let panelSettings = {
         'modify camera angle': 90
     };
-    folder.add ( panelSettings, 'modify camera angle', 30, 90, 10 ).listen().onChange( function ( modAngle ) {
+    folder.add ( panelSettings, 'modify camera angle', 30, 90, 10 ).listen().onChange( function ( modAngle: any ) {
         angle = modAngle
     } );
 
     folder.open()
 }
 
-function modifyCameraAngle( modAngle ) {
+function modifyCameraAngle( modAngle: any ) {
     angle = modAngle
 }
 
 // CONTROLS (replaced with gui)
 function keys(){
-    if (keyboard.pressed("0")){
-        chase = -1;
-    }
-    if (keyboard.pressed("1")){
-        chase = 0;
-    }
-    if (keyboard.pressed("2")){
-        chase = 1;
-    }
-    if (keyboard.pressed("w")){
-        object.extractRotation
-    }
-    if (keyboard.pressed("a")){
-    }
-    if (keyboard.pressed("s")){
-    }
-    if (keyboard.pressed("d")){
-    }
+    //if (keyboard.pressed("0")){
+    //    chase = -1;
+    //}
+    //if (keyboard.pressed("1")){
+    //    chase = 0;
+    //}
+    //if (keyboard.pressed("2")){
+    //    chase = 1;
+    //}
+    //if (keyboard.pressed("w")){
+    //    object.extractRotation
+    //}
+    //if (keyboard.pressed("a")){
+    //}
+    //if (keyboard.pressed("s")){
+    //}
+    //if (keyboard.pressed("d")){
+    //}
 
     if(chase > -1){
         let mm = new THREE.Matrix4();
-        mm.copyPosition(planets[chase].sphere.matrix);
+        mm.copyPosition(morphs[chase].sphere.matrix);
         let position = new THREE.Vector3(0,0.0,0);
         position.setFromMatrixPosition(mm);
 
-        let x = position.x + planets[chase].r * 4 * Math.cos(angle - planets[chase].a1);
-        let z = position.z + planets[chase].r * 4 * Math.sin(angle - planets[chase].a1);
+        let x = position.x + morphs[chase].r * 4 * Math.cos(angle - morphs[chase].a1);
+        let z = position.z + morphs[chase].r * 4 * Math.sin(angle - morphs[chase].a1);
         camera.position.set(x, 0, z);
         camera.lookAt(position)
     }

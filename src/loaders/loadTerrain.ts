@@ -5,8 +5,8 @@ let geometry = new THREE.BufferGeometry()
 class TerrainLoader {
     constructor() {}
 
-    imageData
-    N = 225
+    imageData: any
+    N: number = 225
     geometry = new THREE.BufferGeometry()
 
     loadTerrain() {
@@ -14,7 +14,7 @@ class TerrainLoader {
         let N = this.N
         let model = new THREE.Object3D()
         let canvas = document.createElement( 'canvas' )
-        let context = canvas.getContext( '2d' )
+        let context: any = canvas.getContext( '2d' )
         const image = new Image()
         image.src = 'images/normalMap.jpg'
         image.onload = () => {
@@ -75,7 +75,7 @@ class TerrainLoader {
     }
 }
 
-function getPixel(imageData, x, y){
+function getPixel(imageData: any, x: number, y: number){
     const position = ( x + imageData.width * y ) * 4
     const data = imageData.data
     return data[position];

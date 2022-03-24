@@ -39,7 +39,6 @@ function setPathFor( scene, camera, morph, pathShift = 0 ){
     if ( t >= T )
         t = 0;
     let pathPoint = ( buildPath(pathShift, scene).getPointAt( t / T ) ) 
-    console.log( path )
     morph.position.copy( pathPoint ); // THERE'LL BE FLW
     if ( t + 0.1 > T )
         t = 0;

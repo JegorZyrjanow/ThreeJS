@@ -1,4 +1,4 @@
-import { GUI } from '../../node_modules/three/examples/jsm/libs/lil-gui.module.min.js';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min';
 
 let panelSettings
 const baseActions = {
