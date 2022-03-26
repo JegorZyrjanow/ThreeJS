@@ -1,6 +1,6 @@
 - [ ] couple of moved models
 	- [ ] manually 
-	- [x] auto. along a path
+	- [x] auto along a path
 
 - [ ] moving object to point
 point coords sets by key pressed event

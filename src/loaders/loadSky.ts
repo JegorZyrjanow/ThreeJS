@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 const textureLoader = new THREE.TextureLoader();
 
-const loadSphere = (radius: number, texturePath: string) => {
+const loadSky = (radius: number, texturePath: string) => {
     let geometry = new THREE.SphereGeometry(radius, 200, 200)
     let texture = textureLoader.load(texturePath)
     texture.minFilter = THREE.NearestFilter
@@ -14,4 +14,4 @@ const loadSphere = (radius: number, texturePath: string) => {
     return new THREE.Mesh( geometry, material )
 }
 
-export default loadSphere
+export default loadSky

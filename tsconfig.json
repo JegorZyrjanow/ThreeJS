@@ -7,7 +7,7 @@
       "sourceMap": true,
       "outDir": "./dist",
       "moduleResolution": "node",
-      "removeComments": true,
+      "removeComments": false,
       "noImplicitAny": true,
       "strictNullChecks": true,
       "strictFunctionTypes": true,
@@ -18,7 +18,6 @@
       "noFallthroughCasesInSwitch": true,
       "allowSyntheticDefaultImports": true,
       "esModuleInterop": true,
-      "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       "resolveJsonModule": true,
       "baseUrl": "."

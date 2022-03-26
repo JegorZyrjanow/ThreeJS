@@ -2,18 +2,43 @@ const path = require('path')
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
-    entry: './js/main.js',
+    mode: "development",
+    // entry: {
+        entry: './dist/main.js',
+        // another: './dist/**/*.js'
+    // },
     module: {
         rules: [
-            { test: /\.(js)$/, use: 'babel-loader' }
+            {
+                test: /\.(js)$/,
+                use: 'babel-loader'
+            },
+            {
+                test: /\.(png|svg|jpg|jpeg)$/i,
+                type: 'asset/resource'
+            },
+            {
+                test: /\.(glb|obj|mtl|gltf)$/i,
+                type: 'asset/resource'
+            }
         ]
     },
     output: {
-        path: path.resolve( __dirname, 'dist' ),
-        filename: "index_bundle.js"
+        filename: "[name].bundle.js",
+        path: path.resolve( __dirname, 'dist' )
+    },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'vendor',
+                    chunks: 'all'
+                }
+            }
+        }
     },
     plugins: [
         new HtmlWebpackPlugin()
     ],
-    mode: "development"
 }

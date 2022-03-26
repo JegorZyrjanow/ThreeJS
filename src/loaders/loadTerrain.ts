@@ -9,14 +9,14 @@ class TerrainLoader {
     N: number = 225
     geometry = new THREE.BufferGeometry()
 
-    loadTerrain() {
+    loadTerrain(terrainTexture: string, normalMap: string) {
         //let imageData = this.imageData
         let N = this.N
         let model = new THREE.Object3D()
         let canvas = document.createElement( 'canvas' )
         let context: any = canvas.getContext( '2d' )
         const image = new Image()
-        image.src = 'images/normalMap.jpg'
+        image.src = normalMap
         image.onload = () => {
             canvas.width = image.width
             canvas.height = image.height
@@ -53,7 +53,7 @@ class TerrainLoader {
                 new THREE.Float32BufferAttribute( uvs, 2 ) );
             geometry.computeVertexNormals();
 
-            let texture = new THREE.TextureLoader().load( '../../images/terrain.jpg' )
+            let texture = new THREE.TextureLoader().load( terrainTexture )
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set( 16, 26 ); 

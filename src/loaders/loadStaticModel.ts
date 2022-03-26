@@ -6,8 +6,8 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 
 function loadStaticModel( path: string, oName: string, mName: string, imageData: any ) {
     let N = 225
-    let canvas = (document.getElementsByTagName('canvas'))[0]
-    let context = canvas.getContext( '2d' )
+    let canvas = (document.getElementsByTagName('canvas'))[0] // ???
+    let context = canvas.getContext( '2d' ) // ???
     //context.getImageData
     //let imageData = context.getImageData(0, 0, image.width, image.height)  
     // init three's loaders

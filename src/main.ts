@@ -1,21 +1,23 @@
 import * as THREE from 'three'
-import loadLight from './loaders/loadLight.js'
-import loadSphere from './loaders/loadSphere.js'
-import TerrainLoader from './loaders/loadTerrain.js'
-import loadStaticModel from './loaders/loadStaticModel.js'
-import loadAnimatedModel from './loaders/loadAnimatedModel.js'
-
-import { buildPath } from "./builders/buildPath.js";
-import { setPathFor } from "./builders/buildPath.js";
+import loadLight from './loaders/loadLight'
+import loadSky from './loaders/loadSky'
+import TerrainLoader from './loaders/loadTerrain'
+import loadStaticModel from './loaders/loadStaticModel'
+import loadAnimatedModel from './loaders/loadAnimatedModel'
+import PathBuilder from "./builders/buildPath";
 import createPanel from "./gui/gui.js";
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
+import parrotModel from '../models/Parrot.glb'
+import skyImage from '../images/sky.jpg'
+import terrainTexture from '../images/terrain.jpg'
+import terrainNormalMap from '../images/normalMap.jpg'
 
 //import * as THREE from './lib/three.module.js';
 
 let container: any;
 let camera:any, scene: any, renderer: any
 
-let clock = new THREE.Clock();
+let clock: any = new THREE.Clock();
 let chase: number = -1;
 let angle: number = 45;
 
@@ -30,7 +32,10 @@ init();
 animate();
 
 function init() {
-    container = document.getElementById('container');
+    let el = document.createElement( 'div' )
+    el.setAttribute( "id", "container" )
+    document.body.appendChild(el)
+    container = document.getElementById( 'container' );
     scene = new THREE.Scene();
 
     // Camera
@@ -38,41 +43,41 @@ function init() {
         angle,
         window.innerWidth / window.innerHeight,
         1,
-        4000);
-    camera.position.set(N/2, 100, 300);
-    camera.lookAt(new THREE.Vector3(N/2, 0.0, N/2));
-    renderer = new THREE.WebGLRenderer({ antialias: false });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+        4000 );
+    camera.position.set( N/2, 100, 300 );
+    camera.lookAt( new THREE.Vector3( N/2, 0.0, N/2 ) );
+    renderer = new THREE.WebGLRenderer( { antialias: false } );
+    renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.setClearColor(0x000000, 1);
-    container.appendChild(renderer.domElement);
-    window.addEventListener('resize', onWindowResize, false);
+    container.appendChild( renderer.domElement );
+    window.addEventListener( 'resize', onWindowResize, false );
 
     // Light
     const light = loadLight()
     scene.add( light )
 
     // Sky
-    const sphere = loadSphere(600, "images/sky.jpg")
-    scene.add( sphere )
+    const sky = loadSky( 600, skyImage )
+    scene.add( sky )
 
     // Terrain
     let terrainLoader = new TerrainLoader()
-    const terrain = terrainLoader.loadTerrain()
+    const terrain = terrainLoader.loadTerrain(terrainTexture, terrainNormalMap)
     scene.add( terrain )
 
     // Trees
-    //for (let i = 0; i < 10; i++) {
-    //    let imageData = terrainLoader.getImageData()
-    //    console.log( imageData )
-    //    let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
-    //    scene.add( tree )
-    //}
+    for (let i = 0; i < 10; i++) {
+       let imageData = terrainLoader.getImageData()
+       console.log( imageData )
+       let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
+       scene.add( tree )
+    }
 
     //var animations = gltf.animations
     //mixer.clipAnimation( animations[0], mesh ).play()
     //let mixer = new THREE.AnimationMixer( scene )
     // Bird
-    const animatedModel = loadAnimatedModel("../models/Parrot.glb")
+    const animatedModel = loadAnimatedModel( parrotModel )
     morphs.push( animatedModel ) // add to array
     scene.add( animatedModel )
     //setPathFor(morphs[1], 50)

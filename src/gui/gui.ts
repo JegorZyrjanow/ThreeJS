@@ -8,7 +8,7 @@ const baseActions = {
     turnRight: { weight: 0 }
 };
 let currentBaseAction = 'idle'
-const crossFadeControls = [];
+const crossFadeControls: any = [];
 const additiveActions = {
     sneak_pose: { weight: 0 },
     sad_pose: { weight: 0 },
@@ -72,7 +72,7 @@ function createPanel() {
     });
 }
 
-function setWeight( action, weight ) {
+function setWeight( action: any, weight: number ) {
     action.enabled = true;
     action.setEffectiveTimeScale( 1 );
     action.setEffectiveWeight( weight );
