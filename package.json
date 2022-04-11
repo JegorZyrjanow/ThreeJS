@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "live-server": "^1.2.1",
     "three": "^0.137.5"
   },
   "type": "module",
