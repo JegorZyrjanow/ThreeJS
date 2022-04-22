@@ -1,16 +1,22 @@
 import * as THREE from 'three'
 import loadLight from './loaders/loadLight'
 import loadSky from './loaders/loadSky'
-import TerrainLoader from './loaders/loadTerrain'
-import loadStaticModel from './loaders/loadStaticModel'
+import TerrainLoader from './loaders/TerrainLoader'
+import StaticModelLoader from './loaders/StaticModelLoader'
 import loadAnimatedModel from './loaders/loadAnimatedModel'
 import PathBuilder from "./builders/buildPath";
-import createPanel from "./gui/gui.js";
+// import createPanel from "./gui/gui.js";
 import { GUI } from "three/examples/jsm/libs/lil-gui.module.min";
 import parrotModel from '../models/Parrot.glb'
 import skyImage from '../images/sky.jpg'
 import terrainTexture from '../images/terrain.jpg'
 import terrainNormalMap from '../images/normalMap.jpg'
+
+import treeObj from '../models/Tree.obj'
+import treeMtl from '../models/Tree.mtl'
+
+import { resolve } from 'path'
+import { setQuaternionFromProperEuler } from 'three/src/math/MathUtils'
 
 //import * as THREE from './lib/three.module.js';
 
@@ -60,28 +66,39 @@ function init() {
     const sky = loadSky( 600, skyImage )
     scene.add( sky )
 
-    // Terrain
-    let terrainLoader = new TerrainLoader()
-    const terrain = terrainLoader.loadTerrain(terrainTexture, terrainNormalMap)
-    scene.add( terrain )
+    // Create Terrain
+    let terrainLoader = new TerrainLoader(terrainTexture, terrainNormalMap, 225)
+    terrainLoader.createTerrain( () => {
+        const terrain = terrainLoader.model
+        // Load Terrain
+        scene.add( terrain )
+    })
 
-    // Trees
-    for (let i = 0; i < 10; i++) {
-       let imageData = terrainLoader.getImageData()
-       console.log( imageData )
-       let tree = loadStaticModel("./models/", "Tree.obj", "Tree.mtl", imageData)
-       scene.add( tree )
+    // Static Models [Trees]
+    // let imageData = terrainLoader.getImageData() // Replace with normal map loader into classes to calculate hight of..
+    const treeLoader = new StaticModelLoader( treeObj, treeMtl, terrainNormalMap ) 
+    for (let i = 0; i < 2; i++) {
+        treeLoader.createModel( () => {
+            const tree = treeLoader.model
+            scene.add( tree )
+        })
     }
-
+        
+    {
     //var animations = gltf.animations
     //mixer.clipAnimation( animations[0], mesh ).play()
     //let mixer = new THREE.AnimationMixer( scene )
     // Bird
-    const animatedModel = loadAnimatedModel( parrotModel )
-    morphs.push( animatedModel ) // add to array
-    scene.add( animatedModel )
+    // const animatedModel = loadAnimatedModel( parrotModel )
+    // morphs.push( animatedModel ) // add to array
+    // scene.add( animatedModel )
     //setPathFor(morphs[1], 50)
-    createPanelTest()
+    // createPanelTest()
+    }
+}
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15);
@@ -89,7 +106,7 @@ let m1 = new THREE.Matrix4();
 let m2 = new THREE.Matrix4();
 
 function animate() {
-    setPathFor( scene, camera, morphs[0], 80 );
+    // setPathFor( scene, camera, morphs[0], 80 );
     // ???
     // const newPosition = curve.getPoint(fraction);
     // const tangent = curve.getTangent(fraction);
