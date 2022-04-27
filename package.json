@@ -12,5 +12,16 @@
   "keywords": [],
   "author": "Loh",
   "license": "ISC",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/kefirkruto/ThreeJS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kefirkruto/ThreeJS/issues"
+  },
+  "homepage": "https://github.com/kefirkruto/ThreeJS#readme",
   "description": ""
 }
