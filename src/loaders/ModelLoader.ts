@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 //let manager = new THREE.LoadingManager()
 
@@ -15,6 +16,11 @@ class StaticModelLoader {
         this._objPath = objPath
         this._mtlPath = mtlPath
         this._image = image
+
+        let canvas: any = document.getElementsByTagName( 'canvas' )
+        let context: any = canvas.getContext( '2d' )
+        context.drawImage( image, 0, 0 )
+        this._imageData = context.getImageData( 0, 0, image.width, image.height )
     }
 
     get model(): THREE.Object3D {
@@ -51,18 +57,17 @@ class StaticModelLoader {
                 const x = Math.round( Math.random() * N )
                 const z = Math.round( Math.random() * N )
                 console.log( this._image )
-                const h = this.getPixel( this._image, z, x )
-                obj.position.x = x
-                obj.position.z = z 
-                obj.position.y = h / 10 - 1
-                this._model.add( obj ) // replace with private model field
+                // const h = this.getPixel( this._image, z, x )
+                obj.position.x = x - 112
+                obj.position.z = z - 112
+                // obj.position.y = h / 10 - 1
+                this._model = ( obj ) // replace with private model field
                 console.log(obj)
                 console.log(this._model)
+                callback()
             })
         })
-
         // call add-model-in-scene function after model loaded
-        // callback( image )
     }
 
     // What to do with this?
@@ -74,5 +79,34 @@ class StaticModelLoader {
     }
 }
 
+class AnimatedModelLoader {
+    private readonly _path: string
+    private _model: THREE.Object3D
 
-export default StaticModelLoader
+    constructor(path: string) {
+        this._path = path
+    }
+
+    get model(): THREE.Object3D {
+        if (this._model == null) {
+            console.log("--> No model loaded.")
+        }
+        return this._model
+    }
+
+    loadAnimatedModel(path: string) {
+        let GltfLoader = new GLTFLoader();
+        let model = new THREE.Object3D()
+        GltfLoader.load(path, (gltf) => {
+            let mesh
+            mesh = gltf.scene.children[0]
+            mesh.scale.set(0.05, 0.05, 0.05)
+            mesh.castShadow = true
+            model.add( mesh )
+        })
+        return model
+    }
+}
+
+
+export { StaticModelLoader, AnimatedModelLoader, }

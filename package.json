@@ -16,8 +16,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "live-server": "^1.2.1",
     "lodash": "^4.17.21",
+    "prettier": "^2.6.2",
     "three": "^0.138.3"
   },
   "devDependencies": {
