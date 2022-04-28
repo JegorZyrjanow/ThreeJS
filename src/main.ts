@@ -10,6 +10,7 @@ import loadAnimatedModel from './loaders/loadAnimatedModel'
 import PathBuilder from './builders/buildPath'
 // Resources
 import parrotModel from '../models/Parrot.glb'
+import storkModel from '../models/Stork.glb'
 import skyImage from '../images/sky.jpg'
 import terrainTexture from '../images/terrain.jpg'
 import terrainNormalMap from '../images/normalMap.jpg'
@@ -19,13 +20,13 @@ import treeMtl from '../models/Tree.mtl'
 // VARIABLES
 let container: any
 let camera: any, scene: any, renderer: any
-let clock: any = new THREE.Clock()
 let chase: number = -1
 let angle: number = 45
 //var imageData;
 const N: number = 225
-let morphs: any = []
 let fraction: number = 0
+let clock: any = new THREE.Clock()
+var delta = clock.getDelta()
 
 let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15)
 let m1 = new THREE.Matrix4()
@@ -77,24 +78,28 @@ function loadStaticModel(count: number, imageData: any) {
   }
 }
 // Animated Models
-function loadAnimatedModel(imageData: any) {
+let morphs: any = []
+let mixer: any // = new THREE.AnimationMixer(scene)
+let clips: any
+function loadAnimatedModel(imageData: any, callback: any) {
   // var animations = gltf.animations
   // mixer.clipAnimation( animations[0], mesh ).play()
-  let mixer = new THREE.AnimationMixer(scene)
   // Bird
-  const animatedModelLoader = new AnimatedModelLoader(parrotModel, imageData)
+  const animatedModelLoader = new AnimatedModelLoader(storkModel, imageData)
   animatedModelLoader.createModel(() => {
     const animatedModel = animatedModelLoader.model
     morphs.push(animatedModel) // add to array for animation (?)
     scene.add(animatedModel)
+    // Get the list of AnimationClip instances
+    mixer = new THREE.AnimationMixer(animatedModel)
+    clips = animatedModel.animations
+    callback()
   })
   // setPathFor(morphs[1], 50)
-  // createPanelTest()
 }
 // OBJECTS-end
 
 init()
-animate()
 
 function init() {
   // Container
@@ -129,8 +134,8 @@ function init() {
   let canvas: any = document.createElement('canvas')
   let context: any = canvas.getContext('2d')
 
-  const image = new Image() // this._image
-  image.src = terrainNormalMap // this._normalMap
+  const image = new Image()
+  image.src = terrainNormalMap
 
   image.onload = () => {
     canvas.width = image.width
@@ -142,18 +147,27 @@ function init() {
     // Static Models
     loadStaticModel(10, imageData)
     // Animated Models
-    loadAnimatedModel(imageData)
+    loadAnimatedModel(imageData, () => {
+      animate()
+    })
   }
 }
+
 function animate() {
-  // setPathFor( scene, camera, morphs[0], 80 );
-  // ???
+  const pathBuilder = new PathBuilder()
+  pathBuilder.setPathFor( scene, camera, morphs[0], );
   // const newPosition = curve.getPoint(fraction);
   // const tangent = curve.getTangent(fraction);
-  //morph.position.copy(newPosition);
+  // morphs[0].position.copy(newPosition);
+
+  mixer.update(delta)
+  clips.forEach( function ( clip: any ) {
+    mixer.clipAction( clip ).play();
+  })
   requestAnimationFrame(animate)
   render()
 }
+
 function render() {
   renderer.render(scene, camera)
 }

@@ -1,9 +1,10 @@
-- [-] couple of moved models
+- [ ] animated models move
+---
+- [ ] couple of moved models
 	- [ ] manually 
-	- [x] auto along a path
+	- [ ] auto along a path
 
 - [ ] implement Model classes hierarchy
+	- [ ] Factory for models
 
-- [ ] add and adapt gui
-
-- [ ] add raycaster to detect intersection with
+- [x] add and adapt gui

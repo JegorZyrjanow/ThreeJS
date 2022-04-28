@@ -1,24 +1,38 @@
 import * as THREE from 'three'
 
 class PathBuilder {
-  constructor() {}
   path: any
   mixer: any
   T: number = 11
   t: number = 0
+  private _curve: any
 
-  buildPath(shift: number = 0, scene: any) {
+  constructor() {}
+
+  get curve() {
+    if (this._curve == undefined) {
+      console.log('this shit isn\'t here')
+    }
+    return this._curve
+  }
+
+  makeFcnBirdMove(model: any) {
+    const newPosition = this._curve.getPoint();
+    const tangent = this._curve.getTangent();
+    model.position.copy(newPosition);
+  }
+  build(shift: number = 0, scene: any) {
     // Path points
     this.mixer = new THREE.AnimationMixer(scene)
-    let curve
     let cY = 40
-    curve = new THREE.CubicBezierCurve3(
+    let curve = new THREE.CubicBezierCurve3(
       new THREE.Vector3(120 + shift, cY, 120 + shift),
       new THREE.Vector3(120 + shift, cY, 25 + shift),
       new THREE.Vector3(50 + shift, cY, 25 + shift),
       new THREE.Vector3(50 + shift, cY, 120 + shift)
     )
     let vertices = ([] = curve.getPoints(100))
+    this._curve = curve
 
     // New path with points
     this.path = new THREE.CatmullRomCurve3(vertices)
@@ -32,14 +46,13 @@ class PathBuilder {
 
     return this.path
   }
-
   setPathFor(scene: any, camera: any, morph: any, pathShift: any = 0) {
     let delta = new THREE.Clock().getDelta()
     this.mixer = new THREE.AnimationMixer(morph)
     this.mixer.update(delta)
     this.t = delta
     if (this.t >= this.T) this.t = 0
-    let pathPoint = this.buildPath(pathShift, scene).getPointAt(this.t / this.T)
+    let pathPoint = this.build(pathShift, scene).getPointAt(this.t / this.T)
     morph.position.copy(pathPoint) // THERE'LL BE FLW
     if (this.t + 0.1 > this.T) this.t = 0
     let nextPoint = new THREE.Vector3()
