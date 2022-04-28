@@ -1,4 +1,4 @@
-- [-] couple of moved models
+- [ ] couple of moved models
 	- [ ] manually 
 	- [x] auto along a path
 
