@@ -1,32 +1,20 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as dat from 'dat.gui'
+// Loaders
 import loadLight from './loaders/loadLight'
 import loadSky from './loaders/loadSky'
 import TerrainLoader from './loaders/TerrainLoader'
 import { StaticModelLoader, AnimatedModelLoader } from './loaders/ModelLoader'
 import loadAnimatedModel from './loaders/loadAnimatedModel'
 import PathBuilder from './builders/buildPath'
+// Resources
 import parrotModel from '../models/Parrot.glb'
 import skyImage from '../images/sky.jpg'
 import terrainTexture from '../images/terrain.jpg'
 import terrainNormalMap from '../images/normalMap.jpg'
 import treeObj from '../models/Tree.obj'
 import treeMtl from '../models/Tree.mtl'
-//import * as THREE from './lib/three.module.js';
-
-// GUI
-const gui = new dat.GUI()
-const world = {
-  terrain: { x: 0, z: 0 }
-}
-gui.add(world.terrain, 'x', -10, 10).onChange(() => {
-  terrain.position.setX(-112 - world.terrain.x)
-})
-gui.add(world.terrain, 'z', -10, 10).onChange(() => {
-  terrain.position.setZ(-112 - world.terrain.z)
-})
-// GUI-end
 
 // VARIABLES
 let container: any
@@ -44,12 +32,30 @@ let m1 = new THREE.Matrix4()
 let m2 = new THREE.Matrix4()
 // VARIABLES-end
 
+// GUI
+const gui = new dat.GUI()
+const world = {
+  terrain: { x: 0, z: 0 }
+}
+gui.add(world.terrain, 'x', -10, 10).onChange(() => {
+  terrain.position.setX(-112 - world.terrain.x)
+})
+gui.add(world.terrain, 'z', -10, 10).onChange(() => {
+  terrain.position.setZ(-112 - world.terrain.z)
+})
+// GUI-end
+
 // OBJECTS
 // Create Terrain
 let terrain: THREE.Object3D
 function loadTerrain(imageData: any) {
   // let terrainLoader = new TerrainLoader(terrainTexture, terrainNormalMap, 225)
-  let terrainLoader = new TerrainLoader(terrainTexture, terrainNormalMap, 225, imageData)
+  let terrainLoader = new TerrainLoader(
+    terrainTexture,
+    terrainNormalMap,
+    225,
+    imageData
+  )
   terrainLoader.createTerrain(() => {
     terrain = terrainLoader.model
     scene.add(terrain)
@@ -57,7 +63,12 @@ function loadTerrain(imageData: any) {
 }
 // Static Models (Trees)
 function loadStaticModel(count: number, imageData: any) {
-  const treeLoader = new StaticModelLoader(treeObj, treeMtl, terrainNormalMap, imageData)
+  const treeLoader = new StaticModelLoader(
+    treeObj,
+    treeMtl,
+    terrainNormalMap,
+    imageData
+  )
   for (let i = 0; i < count; i++) {
     treeLoader.createModel(() => {
       const tree = treeLoader.model
@@ -108,15 +119,13 @@ function init() {
   container.appendChild(renderer.domElement)
   window.addEventListener('resize', onWindowResize, false)
   new OrbitControls(camera, renderer.domElement)
-  // Light
+  // Add Light
   const light = loadLight()
   scene.add(light)
-  // Sky
+  // Add Sky
   const sky = loadSky(600, skyImage)
   scene.add(sky)
-
-  // LOAD MODELS
-
+  // Add Models
   let canvas: any = document.createElement('canvas')
   let context: any = canvas.getContext('2d')
 
@@ -135,8 +144,6 @@ function init() {
     // Animated Models
     loadAnimatedModel(imageData)
   }
-  // LOAD MODELS
-
 }
 function animate() {
   // setPathFor( scene, camera, morphs[0], 80 );
@@ -155,7 +162,7 @@ function onWindowResize() {
   camera.updateProjectionMatrix()
   renderer.setSize(window.innerWidth, window.innerHeight)
 }
-// CONTROLS (replaced with gui)
+// CONTROLS (replaced with GUI)
 function keys() {
   //if (keyboard.pressed("0")){
   //    chase = -1;

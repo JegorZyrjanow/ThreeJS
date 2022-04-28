@@ -8,45 +8,21 @@ class TerrainLoader {
   private _model: THREE.Object3D
   private _imageData: any = null
 
-  constructor(terrainTexture: string, normalMap: string, size: number, imageData: any) {
+  constructor(
+    terrainTexture: string,
+    normalMap: string,
+    size: number,
+    imageData: any
+  ) {
     this._texture = terrainTexture
     this._normalMap = normalMap
     this._size = size
     this._imageData = imageData
   }
   public get model(): THREE.Object3D {
-    if (this._model == null) {
-      console.log('--> No model loaded.')
-    }
+    if (this._model == null) console.log('--> No model loaded.')
     return this._model
   }
-  // createTerrain(callback: any) {
-    // const texture = new THREE.TextureLoader().load(this._terrainTexture)
-    // const size = this._size
-
-    // // -- EXTRACT THIS TO INIT
-
-    // let canvas: any = document.createElement('canvas')
-    // let context: any = canvas.getContext('2d')
-
-    // const image = this._image
-    // image.src = this._normalMap
-
-    // image.onload = () => {
-    //   canvas.width = image.width
-    //   canvas.height = image.height
-    //   context.drawImage(image, 0, 0)
-
-    // -- EXTRACT THIS TO INIT-end
-
-      // this._imageData = context.getImageData(0, 0, image.width, image.height)
-
-      // set imageData as parameter (ctor or method)
-      // than create imageData getter to get it for
-      // other loaders
-      
-      // create field of vertices with uvs
-
   createTerrain(callback: any) {
     const texture = new THREE.TextureLoader().load(this._texture)
     const size = this._size
@@ -55,7 +31,7 @@ class TerrainLoader {
     let uvs: any = []
     for (let z = 0; z < size; z++) {
       for (let x = 0; x < size; x++) {
-        let h = this.getPixel(this._imageData, z, x)
+        let h = this.getHeightAt(this._imageData, z, x)
         vertices.push(x, h / 10, z)
         uvs.push(z / (size - 1), x / (size - 1))
       }
@@ -99,13 +75,11 @@ class TerrainLoader {
     callback()
   }
   // get height on normalmap pixel
-  getPixel(imageData: any, x: number, y: number) {
+  getHeightAt(imageData: any, x: number, y: number) {
     const position = (x + imageData.width * y) * 4
     const data = imageData.data
     return data[position]
   }
-  addModel(model: any) {}
-  loadModels() {}
 }
 
 export default TerrainLoader
