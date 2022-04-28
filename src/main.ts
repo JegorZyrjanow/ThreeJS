@@ -47,18 +47,17 @@ let m2 = new THREE.Matrix4()
 // OBJECTS
 // Create Terrain
 let terrain: THREE.Object3D
-function loadTerrain() {
-  let terrainLoader = new TerrainLoader(terrainTexture, terrainNormalMap, 225)
+function loadTerrain(imageData: any) {
+  // let terrainLoader = new TerrainLoader(terrainTexture, terrainNormalMap, 225)
+  let terrainLoader = new TerrainLoader(terrainTexture, terrainNormalMap, 225, imageData)
   terrainLoader.createTerrain(() => {
     terrain = terrainLoader.model
     scene.add(terrain)
   })
 }
 // Static Models (Trees)
-function loadStaticModel(count: number) {
-  // Replace with normal map loader into classes to calculate hight of..
-  // let imageData = terrainLoader.getImageData()
-  const treeLoader = new StaticModelLoader(treeObj, treeMtl, terrainNormalMap)
+function loadStaticModel(count: number, imageData: any) {
+  const treeLoader = new StaticModelLoader(treeObj, treeMtl, terrainNormalMap, imageData)
   for (let i = 0; i < count; i++) {
     treeLoader.createModel(() => {
       const tree = treeLoader.model
@@ -67,15 +66,17 @@ function loadStaticModel(count: number) {
   }
 }
 // Animated Models
-function loadAnimatedModel() {
+function loadAnimatedModel(imageData: any) {
   // var animations = gltf.animations
   // mixer.clipAnimation( animations[0], mesh ).play()
   let mixer = new THREE.AnimationMixer(scene)
   // Bird
-  const animatedModelLoader = new AnimatedModelLoader(parrotModel)
-  const animatedModel = animatedModelLoader.createModel()
-  morphs.push(animatedModel) // add to array for animation (?)
-  scene.add(animatedModel)
+  const animatedModelLoader = new AnimatedModelLoader(parrotModel, imageData)
+  animatedModelLoader.createModel(() => {
+    const animatedModel = animatedModelLoader.model
+    morphs.push(animatedModel) // add to array for animation (?)
+    scene.add(animatedModel)
+  })
   // setPathFor(morphs[1], 50)
   // createPanelTest()
 }
@@ -113,12 +114,29 @@ function init() {
   // Sky
   const sky = loadSky(600, skyImage)
   scene.add(sky)
-  // Terrain
-  loadTerrain()
-  // Static Models
-  loadStaticModel(2)
-  // Animated Models
-  loadAnimatedModel()
+
+  // LOAD MODELS
+
+  let canvas: any = document.createElement('canvas')
+  let context: any = canvas.getContext('2d')
+
+  const image = new Image() // this._image
+  image.src = terrainNormalMap // this._normalMap
+
+  image.onload = () => {
+    canvas.width = image.width
+    canvas.height = image.height
+    context.drawImage(image, 0, 0)
+    let imageData = context.getImageData(0, 0, image.width, image.height)
+    // Terrain
+    loadTerrain(imageData)
+    // Static Models
+    loadStaticModel(10, imageData)
+    // Animated Models
+    loadAnimatedModel(imageData)
+  }
+  // LOAD MODELS
+
 }
 function animate() {
   // setPathFor( scene, camera, morphs[0], 80 );
