@@ -29,10 +29,10 @@ class TerrainLoader {
     const texture = new THREE.TextureLoader().load(this._terrainTexture)
     const size = this._size
 
-    // -- how to extraxt this from here?
+    // -- EXTRACT THIS TO INIT --
     let canvas: any = document.createElement('canvas')
     let context: any = canvas.getContext('2d')
-    // --
+
 
     const image = this._image
     image.src = this._normalMap
@@ -43,6 +43,12 @@ class TerrainLoader {
       context.drawImage(image, 0, 0)
       this._imageData = context.getImageData(0, 0, image.width, image.height)
 
+    // -- EXTRACT THIS TO INIT-end
+
+    // set imageData as parameter (ctor or method)
+    // than create imageData getter to get it for
+    // other loaders
+      
       // create field of vertices with uvs
       let vertices: any = []
       let uvs: any = []
