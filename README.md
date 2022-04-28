@@ -7,3 +7,5 @@
 - [x] add and adapt gui
 
 - [ ] add raycaster to detect intersections
+---
+- [ ] imageData issue
