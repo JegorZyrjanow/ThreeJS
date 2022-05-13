@@ -27,6 +27,10 @@ const N: number = 225
 let fraction: number = 0
 let clock: any = new THREE.Clock()
 var delta = clock.getDelta()
+let pathBuilder: any
+let curve: any
+let t = 0.0;
+let T = 15.0;
 
 let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15)
 let m1 = new THREE.Matrix4()
@@ -35,16 +39,48 @@ let m2 = new THREE.Matrix4()
 
 // GUI
 const gui = new dat.GUI()
-const world = {
-  terrain: { x: 0, z: 0 }
-}
-gui.add(world.terrain, 'x', -10, 10).onChange(() => {
-  terrain.position.setX(-112 - world.terrain.x)
-})
-gui.add(world.terrain, 'z', -10, 10).onChange(() => {
-  terrain.position.setZ(-112 - world.terrain.z)
-})
-// GUI-end
+
+// BUTTONS
+var followParrot = false;
+var followFlamingo = false;
+
+var clickFirstButton = {
+  returnCamera: function () {
+    console.log("1st button is clicked")
+    // ---
+    followParrot = false;
+    followFlamingo = false;
+    camera.position.set(N * 2, 100, N);
+    camera.lookAt(new THREE.Vector3(N / 2, 0, N / 2));
+    console.log("1st button is clicked")
+  }
+};
+gui.add(clickFirstButton, 'returnCamera');
+
+let clickSecondButton = {
+  lookAtParrot: function () {
+    console.log("2nd button is clicked")
+    // ---
+    followParrot = true;
+    followFlamingo = false;
+    console.log(followParrot, followFlamingo)
+  }
+};
+gui.add(clickSecondButton, 'lookAtParrot');
+
+let clickThirdButton = {
+  lookAtFlamingo: function () {
+    console.log('3rd button is clicked')
+    // ---
+    followParrot = false;
+    followFlamingo = true;
+    console.log(followParrot, followFlamingo)
+  }
+};
+gui.add(clickThirdButton, 'lookAtFlamingo');
+// END-BUTTONS
+
+// END-GUI
 
 // OBJECTS
 // Create Terrain
@@ -67,7 +103,6 @@ function loadStaticModel(count: number, imageData: any) {
   const treeLoader = new StaticModelLoader(
     treeObj,
     treeMtl,
-    terrainNormalMap,
     imageData
   )
   for (let i = 0; i < count; i++) {
@@ -81,21 +116,20 @@ function loadStaticModel(count: number, imageData: any) {
 let morphs: any = []
 let mixer: any // = new THREE.AnimationMixer(scene)
 let clips: any
-function loadAnimatedModel(imageData: any, callback: any) {
-  // var animations = gltf.animations
-  // mixer.clipAnimation( animations[0], mesh ).play()
+let animatedModel: any
   // Bird
-  const animatedModelLoader = new AnimatedModelLoader(storkModel, imageData)
-  animatedModelLoader.createModel(() => {
-    const animatedModel = animatedModelLoader.model
-    morphs.push(animatedModel) // add to array for animation (?)
-    scene.add(animatedModel)
-    // Get the list of AnimationClip instances
-    mixer = new THREE.AnimationMixer(animatedModel)
-    clips = animatedModel.animations
-    callback()
+function loadAnimatedModel(imageData: any) {
+  return new Promise(resolve => {
+    const animatedModelLoader = new AnimatedModelLoader(storkModel, imageData)
+    animatedModelLoader.createModel(() => {
+      animatedModel = animatedModelLoader.model
+      morphs.push(animatedModel) // add to array for animation (?)
+      scene.add(animatedModel)
+      // Get the list of AnimationClip instances
+      mixer = new THREE.AnimationMixer(animatedModel)
+      clips = animatedModel.animations
+    })
   })
-  // setPathFor(morphs[1], 50)
 }
 // OBJECTS-end
 
@@ -118,6 +152,8 @@ function init() {
   )
   camera.position.set(N / 2, 100, 300)
   camera.lookAt(new THREE.Vector3(N / 2, 0.0, N / 2))
+
+  // Renderer
   renderer = new THREE.WebGLRenderer({ antialias: false })
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setClearColor(0x000000, 1)
@@ -125,7 +161,13 @@ function init() {
   window.addEventListener('resize', onWindowResize, false)
   new OrbitControls(camera, renderer.domElement)
   // Add Light
-  const light = loadLight()
+  const light = new THREE.PointLight(0xffffff, 1, 1000)
+  light.position.set(300, 100, 128)
+  light.castShadow = true
+  light.shadow.mapSize.width = 512
+  light.shadow.mapSize.height = 512
+  light.shadow.camera.near = 0.5
+  light.shadow.camera.far = 1500
   scene.add(light)
   // Add Sky
   const sky = loadSky(600, skyImage)
@@ -147,25 +189,86 @@ function init() {
     // Static Models
     loadStaticModel(10, imageData)
     // Animated Models
-    loadAnimatedModel(imageData, () => {
-      animate()
+    loadAnimatedModel(imageData).then(() => {
+      pathBuilder = new PathBuilder(scene, camera)
+
+      pathBuilder.build(scene).then(buildAPath())
+
+      function buildAPath() {
+        morphs[0].route = pathBuilder.path
+        console.log('--> path is ' + pathBuilder.path)
+        animate()
+      }
+      // curve = pathBuilder.curve
+      // newPosition = curve.getPoint(fraction)
     })
   }
 }
 
-function animate() {
-  const pathBuilder = new PathBuilder()
-  pathBuilder.setPathFor( scene, camera, morphs[0], );
-  // const newPosition = curve.getPoint(fraction);
-  // const tangent = curve.getTangent(fraction);
-  // morphs[0].position.copy(newPosition);
+let newPosition: any
+// let tangent = curve.getTangent(fraction) // ???
+let morph: any
 
+function animate() {
+  let delta = clock.getDelta()
   mixer.update(delta)
-  clips.forEach( function ( clip: any ) {
-    mixer.clipAction( clip ).play();
-  })
+
+  for (let i = 0; i < morphs.length; i++) {
+    // let vertices = curve.getPoints( 40 );
+    // var path = new THREE.CatmullRomCurve3(vertices);
+
+    morph = morphs[i]
+    var pos = new THREE.Vector3()
+    // console.log(path.getPointAt(t/T))
+    // pos.copy(path.getPointAt(t/T)) // replace curve with path object
+    // animatedModel.position.copy(pos)
+    // t += delta
+    if (t >= T)
+      t = 0
+
+    console.log("1" + morph.route)
+    pos.copy(morph.route.getPointAt(t / T)) // ???
+    morph.mesh.position.copy(pos)
+
+    t += 0.015
+
+    if (t >= T)
+      t = 0
+
+    let nextPoint = new THREE.Vector3()
+    console.log("2" + morph.route)
+    nextPoint.copy(morph.route.getPointAt(t / T)) // ???
+
+    if (followParrot && i == 0) {
+      cameraFollow(morph)
+    }
+    if (followFlamingo && i == 1) {
+      cameraFollow(morph)
+    }
+    // morph.lookAt(nextPoint)
+    // if (t >= T)
+    //   t = 0
+  }
+  // morphs[0].position.copy(newPosition)
+  // clips.forEach(function (clip: any) {
+  //   mixer.clipAction(clip).play()
+  // })
   requestAnimationFrame(animate)
   render()
+}
+
+function cameraFollow(morph:any) {
+  let relativeCameraOffset = new THREE.Vector3(0, 15, -40)
+  let m1 = new THREE.Matrix4();
+  let m2 = new THREE.Matrix4();
+
+  m1.extractRotation(morph.mesh.matrixWorld)
+  m1.copyPosition(morph.mesh.matrixWorld)
+  m1.multiplyMatrices(m2, m1)
+
+  let cameraOffset = relativeCameraOffset.applyMatrix4(m1)
+  camera.position.copy(cameraOffset)
+  camera.lootAt(morph.mesh.position)
 }
 
 function render() {

@@ -3,26 +3,25 @@ import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
-class ObjectLoader {
+class ModelLoader {
   protected readonly _imageData: any
   constructor(imageData: any) {
     this._imageData = imageData
   }
-  getPixel(x: number, y: number) {
+  getHeight(x: number, y: number) {
     const position = (x + this._imageData.width * y) * 4
     const data = this._imageData.data
     return data[position]
   }
 }
 
-class StaticModelLoader extends ObjectLoader {
+class StaticModelLoader extends ModelLoader {
   private readonly _objPath: string
   private readonly _mtlPath: string
   private _model: THREE.Object3D
   constructor(
     objPath: string,
     mtlPath: string,
-    image: typeof Image,
     imageData: any
   ) {
     super(imageData)
@@ -49,7 +48,7 @@ class StaticModelLoader extends ObjectLoader {
         obj.scale.set(0.15, 0.15, 0.15)
         const x = Math.round(Math.random() * N)
         const z = Math.round(Math.random() * N)
-        const h = super.getPixel(z, x)
+        const h = super.getHeight(z, x)
         obj.position.x = x - 112
         obj.position.z = z - 112
         obj.position.y = h / 10 - 0.1
@@ -58,14 +57,9 @@ class StaticModelLoader extends ObjectLoader {
       })
     })
   }
-  getPixel(x: number, y: number) {
-    const position = (x + this._imageData.width * y) * 4
-    const data = this._imageData.data
-    return data[position]
-  }
 }
 
-class AnimatedModelLoader extends ObjectLoader {
+class AnimatedModelLoader extends ModelLoader {
   private readonly _path: string
   private _model: THREE.Object3D
   constructor(path: string, imageData: any) {
@@ -84,7 +78,7 @@ class AnimatedModelLoader extends ObjectLoader {
       this._model = mesh
       const z = mesh.position.z
       const x = mesh.position.x
-      const h = super.getPixel(z, x)
+      const h = super.getHeight(z, x)
       this._model.position.setY(h / 10 + 25)
       callback()
     })
