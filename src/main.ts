@@ -7,7 +7,7 @@ import loadSky from './loaders/loadSky'
 import TerrainLoader from './loaders/TerrainLoader'
 import { StaticModelLoader, AnimatedModelLoader } from './loaders/ModelLoader'
 import loadAnimatedModel from './loaders/loadAnimatedModel'
-import PathBuilder from './builders/buildPath'
+import PathBuilder from './builders/PathBuilder'
 // Resources
 import parrotModel from '../models/Parrot.glb'
 import storkModel from '../models/Stork.glb'
@@ -93,7 +93,7 @@ function loadTerrain(imageData: any) {
     225,
     imageData
   )
-  terrainLoader.createTerrain(() => {
+  terrainLoader.createTerrain().then(() => {
     terrain = terrainLoader.model
     scene.add(terrain)
   })
@@ -106,7 +106,7 @@ function loadStaticModel(count: number, imageData: any) {
     imageData
   )
   for (let i = 0; i < count; i++) {
-    treeLoader.createModel(() => {
+    treeLoader.createModel().then(() => {
       const tree = treeLoader.model
       scene.add(tree)
     })
@@ -121,7 +121,7 @@ let animatedModel: any
 function loadAnimatedModel(imageData: any) {
   return new Promise(resolve => {
     const animatedModelLoader = new AnimatedModelLoader(storkModel, imageData)
-    animatedModelLoader.createModel(() => {
+    animatedModelLoader.createModel().then(() => {
       animatedModel = animatedModelLoader.model
       morphs.push(animatedModel) // add to array for animation (?)
       scene.add(animatedModel)
@@ -160,6 +160,7 @@ function init() {
   container.appendChild(renderer.domElement)
   window.addEventListener('resize', onWindowResize, false)
   new OrbitControls(camera, renderer.domElement)
+
   // Add Light
   const light = new THREE.PointLight(0xffffff, 1, 1000)
   light.position.set(300, 100, 128)
@@ -169,9 +170,11 @@ function init() {
   light.shadow.camera.near = 0.5
   light.shadow.camera.far = 1500
   scene.add(light)
+
   // Add Sky
   const sky = loadSky(600, skyImage)
   scene.add(sky)
+
   // Add Models
   let canvas: any = document.createElement('canvas')
   let context: any = canvas.getContext('2d')
@@ -278,42 +281,4 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
   renderer.setSize(window.innerWidth, window.innerHeight)
-}
-// CONTROLS (replaced with GUI)
-function keys() {
-  //if (keyboard.pressed("0")){
-  //    chase = -1;
-  //}
-  //if (keyboard.pressed("1")){
-  //    chase = 0;
-  //}
-  //if (keyboard.pressed("2")){
-  //    chase = 1;
-  //}
-  //if (keyboard.pressed("w")){
-  //    object.extractRotation
-  //}
-  //if (keyboard.pressed("a")){
-  //}
-  //if (keyboard.pressed("s")){
-  //}
-  //if (keyboard.pressed("d")){
-  //}
-
-  if (chase > -1) {
-    let mm = new THREE.Matrix4()
-    mm.copyPosition(morphs[chase].sphere.matrix)
-    let position = new THREE.Vector3(0, 0.0, 0)
-    position.setFromMatrixPosition(mm)
-
-    let x =
-      position.x + morphs[chase].r * 4 * Math.cos(angle - morphs[chase].a1)
-    let z =
-      position.z + morphs[chase].r * 4 * Math.sin(angle - morphs[chase].a1)
-    camera.position.set(x, 0, z)
-    camera.lookAt(position)
-  } else {
-    camera.position.set(0, 400, 400)
-    camera.lookAt(new THREE.Vector3(0, 0.0, 0))
-  }
 }
