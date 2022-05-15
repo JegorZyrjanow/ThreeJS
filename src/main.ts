@@ -111,10 +111,10 @@ let morphs: any = []
 let mixer: any // = new THREE.AnimationMixer(scene)
 let clips: any
 let animatedModel: any
-// Bird
-function loadAnimatedModel(imageData: any) {
+// Birds
+function loadAnimatedModel(model:any, imageData:any) {
   return new Promise(resolve => {
-    const animatedModelLoader = new AnimatedModelLoader(storkModel, imageData)
+    const animatedModelLoader = new AnimatedModelLoader(model, imageData)
     animatedModelLoader.createModel().then(() => {
       animatedModel = animatedModelLoader.model
       morphs.push(animatedModel) // add to array for animation (?)
@@ -194,6 +194,19 @@ function init() {
   const image = new Image()
   image.src = terrainNormalMap
 
+  function buildStorkPath() {
+    // morphs.forEach((morph:any) => {
+    //   morph.route = pathBuilder.path
+    // });
+    morphs[0].route = pathBuilder.path
+  }
+  function buildParrotPath() {
+    // morphs.forEach((morph:any) => {
+    //   morph.route = pathBuilder.path
+    // });
+    morphs[1].route = pathBuilder.path
+    animate()
+  }
   image.onload = () => {
     canvas.width = image.width
     canvas.height = image.height
@@ -204,16 +217,16 @@ function init() {
     // Static Models
     loadStaticModel(10, imageData)
     // Animated Models
-    loadAnimatedModel(imageData).then(() => {
-      pathBuilder = new PathBuilder(scene, camera)
 
-      pathBuilder.build(scene).then(buildAPath())
+    loadAnimatedModel(storkModel, imageData)
+      .then(() => loadAnimatedModel(parrotModel, imageData)
+        .then(() => {
+        pathBuilder = new PathBuilder(scene, camera)
 
-      function buildAPath() {
-        morphs[0].route = pathBuilder.path
-        animate()
-      }
-    })
+        pathBuilder.build(scene).then(buildStorkPath())
+        pathBuilder.build(scene, 20).then(buildParrotPath())
+
+    }))
   }
 }
 
@@ -237,11 +250,11 @@ function animate() {
     nextPoint.copy(morph.route.getPointAt(t / T))
     morph.lookAt(nextPoint)
 
-    if (followParrot && i == 0) {
+    if (followStork && i == 0) {
       cameraFollow(morph)
     }
 
-    if (followStork && i == 0) {
+    if (followParrot && i == 1) {
       cameraFollow(morph)
     }
   }

@@ -26,11 +26,12 @@ class PathBuilder {
   //   const tangent = this._curves[0].getTangent()
   //   model.position.copy(newPosition)
   // }
-  build(scene: any) {
+  build(scene: any, shiftUp: number = 0) {
     return new Promise(resolve => {
       // Path points
       this.mixer = new THREE.AnimationMixer(scene)
       let cY = 40
+      cY += shiftUp
       let firstCurve = new THREE.CubicBezierCurve3(
         new THREE.Vector3(20, cY, 20),
         new THREE.Vector3(20, cY, -20),
