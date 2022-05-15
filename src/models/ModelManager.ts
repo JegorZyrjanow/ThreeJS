@@ -13,6 +13,4 @@ class ModelManager {
       console.log('--x Model ' + model + ' already here.')
     }
   }
-
-  
 }

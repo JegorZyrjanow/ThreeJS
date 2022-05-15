@@ -2,6 +2,7 @@ const path = require('path')
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
+    watch: true,
     mode: "development",
     // entry: {
         entry: './dist/main.js',

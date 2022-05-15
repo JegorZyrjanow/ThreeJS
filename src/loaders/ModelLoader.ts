@@ -19,11 +19,7 @@ class StaticModelLoader extends ModelLoader {
   private readonly _objPath: string
   private readonly _mtlPath: string
   private _model: THREE.Object3D
-  constructor(
-    objPath: string,
-    mtlPath: string,
-    imageData: any
-  ) {
+  constructor(objPath: string, mtlPath: string, imageData: any) {
     super(imageData)
     this._objPath = objPath
     this._mtlPath = mtlPath
@@ -54,6 +50,7 @@ class StaticModelLoader extends ModelLoader {
           obj.position.z = z - 112
           obj.position.y = h / 10 - 0.1
           this._model = obj // replace with private model field
+          resolve('--> createModel is done')
         })
       })
     })
@@ -82,6 +79,7 @@ class AnimatedModelLoader extends ModelLoader {
         const x = mesh.position.x
         const h = super.getHeight(z, x)
         this._model.position.setY(h / 10 + 25)
+        resolve('--> createModel is done')
       })
     })
   }

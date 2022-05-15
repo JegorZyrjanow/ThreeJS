@@ -72,7 +72,7 @@ class TerrainLoader {
       const mesh = new THREE.Mesh(geometry, material)
       mesh.position.set(-112, 0, -112)
       this._model = mesh
-      // call add-model-in-scene function after model loaded
+      resolve('--> createTerrain is done')
     })
   }
   // get height on normalmap pixel

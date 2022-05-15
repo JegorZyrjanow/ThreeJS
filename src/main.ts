@@ -1,26 +1,24 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import * as dat from 'dat.gui'
+
 // Loaders
-import loadLight from './loaders/loadLight'
-import loadSky from './loaders/loadSky'
 import TerrainLoader from './loaders/TerrainLoader'
 import { StaticModelLoader, AnimatedModelLoader } from './loaders/ModelLoader'
-import loadAnimatedModel from './loaders/loadAnimatedModel'
 import PathBuilder from './builders/PathBuilder'
+
 // Resources
-import parrotModel from '../models/Parrot.glb'
-import storkModel from '../models/Stork.glb'
-import skyImage from '../images/sky.jpg'
-import terrainTexture from '../images/terrain.jpg'
-import terrainNormalMap from '../images/normalMap.jpg'
-import treeObj from '../models/Tree.obj'
-import treeMtl from '../models/Tree.mtl'
+import parrotModel from       '../public/models/Parrot.glb'
+import storkModel from        '../public/models/Stork.glb'
+import skyImage from          '../public/images/sky.jpg'
+import terrainTexture from    '../public/images/terrain.jpg'
+import terrainNormalMap from  '../public/images/normalMap.jpg'
+import treeObj from           '../public/models/Tree.obj'
+import treeMtl from           '../public/models/Tree.mtl'
 
 // VARIABLES
 let container: any
 let camera: any, scene: any, renderer: any
-let chase: number = -1
 let angle: number = 45
 //var imageData;
 const N: number = 225
@@ -28,56 +26,57 @@ let fraction: number = 0
 let clock: any = new THREE.Clock()
 var delta = clock.getDelta()
 let pathBuilder: any
-let curve: any
-let t = 0.0;
-let T = 15.0;
+let t = 0.0
+let T = 15.0
 
 let relativeCameraOffset = new THREE.Vector3(N / 2, N / 2, 15)
 let m1 = new THREE.Matrix4()
 let m2 = new THREE.Matrix4()
+
+let controls: any
 // VARIABLES-end
 
 // GUI
 const gui = new dat.GUI()
 
 // BUTTONS
-var followParrot = false;
-var followFlamingo = false;
+var followParrot = false
+var followStork = false
 
 var clickFirstButton = {
   returnCamera: function () {
-    console.log("1st button is clicked")
+    console.log('1st button is clicked')
     // ---
-    followParrot = false;
-    followFlamingo = false;
-    camera.position.set(N * 2, 100, N);
-    camera.lookAt(new THREE.Vector3(N / 2, 0, N / 2));
-    console.log("1st button is clicked")
+    followParrot = false
+    followStork = false
+    camera.position.set(N / 1.5, 100, 0)
+    camera.lookAt(new THREE.Vector3(N / 2, 0.0, N / 2))
+    console.log('1st button is clicked')
   }
-};
-gui.add(clickFirstButton, 'returnCamera');
+}
+gui.add(clickFirstButton, 'returnCamera')
 
 let clickSecondButton = {
   lookAtParrot: function () {
-    console.log("2nd button is clicked")
+    console.log('2nd button is clicked')
     // ---
-    followParrot = true;
-    followFlamingo = false;
-    console.log(followParrot, followFlamingo)
+    followParrot = true
+    followStork = false
+    console.log(followParrot, followStork)
   }
-};
-gui.add(clickSecondButton, 'lookAtParrot');
+}
+gui.add(clickSecondButton, 'lookAtParrot')
 
 let clickThirdButton = {
-  lookAtFlamingo: function () {
+  lookAtStork: function () {
     console.log('3rd button is clicked')
     // ---
-    followParrot = false;
-    followFlamingo = true;
-    console.log(followParrot, followFlamingo)
+    followParrot = false
+    followStork = true
+    console.log(followParrot, followStork)
   }
-};
-gui.add(clickThirdButton, 'lookAtFlamingo');
+}
+gui.add(clickThirdButton, 'lookAtStork')
 // END-BUTTONS
 
 // END-GUI
@@ -100,15 +99,10 @@ function loadTerrain(imageData: any) {
 }
 // Static Models (Trees)
 function loadStaticModel(count: number, imageData: any) {
-  const treeLoader = new StaticModelLoader(
-    treeObj,
-    treeMtl,
-    imageData
-  )
   for (let i = 0; i < count; i++) {
+    const treeLoader = new StaticModelLoader(treeObj, treeMtl, imageData)
     treeLoader.createModel().then(() => {
-      const tree = treeLoader.model
-      scene.add(tree)
+      scene.add(treeLoader.model)
     })
   }
 }
@@ -117,7 +111,7 @@ let morphs: any = []
 let mixer: any // = new THREE.AnimationMixer(scene)
 let clips: any
 let animatedModel: any
-  // Bird
+// Bird
 function loadAnimatedModel(imageData: any) {
   return new Promise(resolve => {
     const animatedModelLoader = new AnimatedModelLoader(storkModel, imageData)
@@ -127,7 +121,8 @@ function loadAnimatedModel(imageData: any) {
       scene.add(animatedModel)
       // Get the list of AnimationClip instances
       mixer = new THREE.AnimationMixer(animatedModel)
-      clips = animatedModel.animations
+      clips = animatedModel.animations // NEVER READ
+      resolve('--> loadAnimatedModel is done')
     })
   })
 }
@@ -150,7 +145,7 @@ function init() {
     1,
     4000
   )
-  camera.position.set(N / 2, 100, 300)
+  camera.position.set(N / 1.5, 100, 0)
   camera.lookAt(new THREE.Vector3(N / 2, 0.0, N / 2))
 
   // Renderer
@@ -158,8 +153,16 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setClearColor(0x000000, 1)
   container.appendChild(renderer.domElement)
-  window.addEventListener('resize', onWindowResize, false)
-  new OrbitControls(camera, renderer.domElement)
+  window.addEventListener(
+    'resize',
+    () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+    },
+    false
+  )
+  controls = new OrbitControls(camera, renderer.domElement)
 
   // Add Light
   const light = new THREE.PointLight(0xffffff, 1, 1000)
@@ -170,9 +173,18 @@ function init() {
   light.shadow.camera.near = 0.5
   light.shadow.camera.far = 1500
   scene.add(light)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3)
+  scene.add(ambientLight)
 
   // Add Sky
-  const sky = loadSky(600, skyImage)
+  let geometry = new THREE.SphereGeometry(1600, 200, 200)
+  let texture = new THREE.TextureLoader().load(skyImage)
+  texture.minFilter = THREE.NearestFilter
+  let material = new THREE.MeshBasicMaterial({
+    map: texture,
+    side: THREE.DoubleSide
+  })
+  const sky = new THREE.Mesh(geometry, material)
   scene.add(sky)
 
   // Add Models
@@ -199,86 +211,55 @@ function init() {
 
       function buildAPath() {
         morphs[0].route = pathBuilder.path
-        console.log('--> path is ' + pathBuilder.path)
         animate()
       }
-      // curve = pathBuilder.curve
-      // newPosition = curve.getPoint(fraction)
     })
   }
 }
 
-let newPosition: any
-// let tangent = curve.getTangent(fraction) // ???
-let morph: any
-
 function animate() {
+  controls.update()
   let delta = clock.getDelta()
   mixer.update(delta)
-
   for (let i = 0; i < morphs.length; i++) {
-    // let vertices = curve.getPoints( 40 );
-    // var path = new THREE.CatmullRomCurve3(vertices);
-
-    morph = morphs[i]
+    let morph = morphs[i]
     var pos = new THREE.Vector3()
-    // console.log(path.getPointAt(t/T))
-    // pos.copy(path.getPointAt(t/T)) // replace curve with path object
-    // animatedModel.position.copy(pos)
-    // t += delta
-    if (t >= T)
-      t = 0
 
-    console.log("1" + morph.route)
-    pos.copy(morph.route.getPointAt(t / T)) // ???
-    morph.mesh.position.copy(pos)
+    if (t >= T) t = 0
 
+    pos.copy(morph.route.getPointAt(t / T))
+    morph.position.copy(pos)
     t += 0.015
 
-    if (t >= T)
-      t = 0
+    if (t >= T) t = 0
 
     let nextPoint = new THREE.Vector3()
-    console.log("2" + morph.route)
-    nextPoint.copy(morph.route.getPointAt(t / T)) // ???
+    nextPoint.copy(morph.route.getPointAt(t / T))
+    morph.lookAt(nextPoint)
 
     if (followParrot && i == 0) {
       cameraFollow(morph)
     }
-    if (followFlamingo && i == 1) {
+
+    if (followStork && i == 0) {
       cameraFollow(morph)
     }
-    // morph.lookAt(nextPoint)
-    // if (t >= T)
-    //   t = 0
   }
-  // morphs[0].position.copy(newPosition)
-  // clips.forEach(function (clip: any) {
-  //   mixer.clipAction(clip).play()
-  // })
+
   requestAnimationFrame(animate)
-  render()
+  renderer.render(scene, camera)
 }
 
-function cameraFollow(morph:any) {
+function cameraFollow(morph: any) {
   let relativeCameraOffset = new THREE.Vector3(0, 15, -40)
-  let m1 = new THREE.Matrix4();
-  let m2 = new THREE.Matrix4();
+  let m1 = new THREE.Matrix4()
+  let m2 = new THREE.Matrix4()
 
-  m1.extractRotation(morph.mesh.matrixWorld)
-  m1.copyPosition(morph.mesh.matrixWorld)
+  m1.extractRotation(morph.matrixWorld)
+  m1.copyPosition(morph.matrixWorld)
   m1.multiplyMatrices(m2, m1)
 
   let cameraOffset = relativeCameraOffset.applyMatrix4(m1)
   camera.position.copy(cameraOffset)
-  camera.lootAt(morph.mesh.position)
-}
-
-function render() {
-  renderer.render(scene, camera)
-}
-function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  camera.lookAt(morph.position)
 }
