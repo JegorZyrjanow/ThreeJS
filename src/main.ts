@@ -8,15 +8,21 @@ import { StaticModelLoader, AnimatedModelLoader } from './loaders/ModelLoader'
 import PathBuilder from './builders/PathBuilder'
 
 // Resources
-import parrotModel from       '../public/models/Parrot.glb'
-import storkModel from        '../public/models/Stork.glb'
-import skyImage from          '../public/images/sky.jpg'
-import terrainTexture from    '../public/images/terrain.jpg'
-import terrainNormalMap from  '../public/images/normalMap.jpg'
-import treeObj from           '../public/models/Tree.obj'
-import treeMtl from           '../public/models/Tree.mtl'
+import parrotModel from '../public/models/Parrot.glb'
+import storkModel from '../public/models/Stork.glb'
+import skyImage from '../public/images/sky.jpg'
+import terrainTexture from '../public/images/terrain.jpg'
+import terrainNormalMap from '../public/images/normalMap.jpg'
+import treeObj from '../public/models/Tree.obj'
+import treeMtl from '../public/models/Tree.mtl'
 
 // VARIABLES
+let downKey = false
+let upKey = false
+let leftKey = false
+let rightKey = false
+let axisY = new THREE.Vector3(0, 5, 0)
+let axisZ = new THREE.Vector3(5, 0, 0)
 let container: any
 let camera: any, scene: any, renderer: any
 let angle: number = 45
@@ -77,6 +83,45 @@ let clickThirdButton = {
   }
 }
 gui.add(clickThirdButton, 'lookAtStork')
+
+let clickUp = {
+  Down: function () {
+    console.log('3rd button is clicked')
+    // ---
+    morphs[0].rotateOnAxis(axisZ, Math.PI / 200.0);
+  }
+}
+gui.add(clickUp, 'Down')
+
+let clickDown = {
+  Up: function () {
+    console.log('3rd button is clicked')
+    // ---
+    morphs[0].rotateOnAxis(axisZ, -Math.PI / 200.0);
+  }
+}
+gui.add(clickDown, 'Up')
+
+let clickLeft = {
+  Left: function () {
+    console.log('3rd button is clicked')
+    // ---
+    morphs[0].rotateOnAxis(axisY, Math.PI / 100.0);
+    morphs[0].rotateOnAxis(axisZ, -Math.PI / 400.0);
+  }
+}
+gui.add(clickLeft, 'Left')
+
+let clickRight = {
+  Right: function () {
+    console.log('3rd button is clicked')
+    // ---
+    morphs[0].rotateOnAxis(axisY, -Math.PI / 100.0);
+    morphs[0].rotateOnAxis(axisZ, -Math.PI / 400.0);
+  }
+}
+gui.add(clickRight, 'Right')
+
 // END-BUTTONS
 
 // END-GUI
@@ -112,7 +157,7 @@ let mixer: any // = new THREE.AnimationMixer(scene)
 let clips: any
 let animatedModel: any
 // Birds
-function loadAnimatedModel(model:any, imageData:any) {
+function loadAnimatedModel(model: any, imageData: any) {
   return new Promise(resolve => {
     const animatedModelLoader = new AnimatedModelLoader(model, imageData)
     animatedModelLoader.createModel().then(() => {
@@ -221,12 +266,12 @@ function init() {
     loadAnimatedModel(storkModel, imageData)
       .then(() => loadAnimatedModel(parrotModel, imageData)
         .then(() => {
-        pathBuilder = new PathBuilder(scene, camera)
+          pathBuilder = new PathBuilder(scene, camera)
 
-        pathBuilder.build(scene).then(buildStorkPath())
-        pathBuilder.build(scene, 20).then(buildParrotPath())
+          pathBuilder.build(scene).then(buildStorkPath())
+          pathBuilder.build(scene, 20).then(buildParrotPath())
 
-    }))
+        }))
   }
 }
 
@@ -236,19 +281,19 @@ function animate() {
   mixer.update(delta)
   for (let i = 0; i < morphs.length; i++) {
     let morph = morphs[i]
-    var pos = new THREE.Vector3()
+    // var pos = new THREE.Vector3()
 
-    if (t >= T) t = 0
+    // if (t >= T) t = 0
 
-    pos.copy(morph.route.getPointAt(t / T))
-    morph.position.copy(pos)
-    t += 0.015
+    // pos.copy(morph.route.getPointAt(t / T))
+    // morph.position.copy(pos)
+    // t += 0.015
 
-    if (t >= T) t = 0
+    // if (t >= T) t = 0
 
-    let nextPoint = new THREE.Vector3()
-    nextPoint.copy(morph.route.getPointAt(t / T))
-    morph.lookAt(nextPoint)
+    // let nextPoint = new THREE.Vector3()
+    // nextPoint.copy(morph.route.getPointAt(t / T))
+    // morph.lookAt(nextPoint)
 
     if (followStork && i == 0) {
       cameraFollow(morph)
@@ -258,6 +303,51 @@ function animate() {
       cameraFollow(morph)
     }
   }
+  let morph = morphs[1]
+  var pos = new THREE.Vector3()
+
+  if (t >= T) t = 0
+
+  pos.copy(morph.route.getPointAt(t / T))
+  morph.position.copy(pos)
+  t += 0.015
+
+  if (t >= T) t = 0
+
+  let nextPoint = new THREE.Vector3()
+  nextPoint.copy(morph.route.getPointAt(t / T))
+  morph.lookAt(nextPoint)
+
+  // let relativeCameraOffset = new THREE.Vector3(0, 50, -150);
+  // let m1 = new THREE.Matrix4();
+  // let m2 = new THREE.Matrix4();
+
+  // m1.extractRotation(morphs[0].matrixWorld);
+  // m2.copyPosition(morphs[0].matrixWorld);
+  // m1.multiplyMatrices(m2, m1);
+
+  // var cameraOffset = relativeCameraOffset.applyMatrix4(m1);
+  // camera.position.copy(cameraOffset);
+  // camera.lookAt(morphs[0].position);
+
+  morphs[0].translateZ(50 * delta);
+
+  if (rightKey == false) {
+    rightKey = true
+  }
+  else rightKey = false
+  if (leftKey == false) {
+    leftKey = true
+  }
+  else leftKey = false
+  if (downKey == false) {
+    downKey = true
+  }
+  else downKey = false
+  if (upKey == false) {
+    upKey = true
+  }
+  else upKey = false
 
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
